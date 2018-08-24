@@ -1,4 +1,8 @@
 
+###> jetbrains/phpstorm ###
+.idea/
+###< jetbrains/phpstorm ###
+
 ###> symfony/framework-bundle ###
 /.env
 /public/bundles/
