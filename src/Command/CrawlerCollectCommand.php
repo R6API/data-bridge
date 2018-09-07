@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CrawlerFetchCommand extends Command
+class CrawlerCollectCommand extends Command
 {
     const ROOT_FILE = 'main';
     const FILES = [
@@ -20,7 +20,7 @@ class CrawlerFetchCommand extends Command
         'seasons'
     ];
 
-    const REGEX = '#https\:\/\/ubistatic-a\.akamaihd\.net\/0058\/prod\/assets\/(data|scripts)\/__FILE__\.[a-zA-Z0-9]{8}\.js#im';
+    const REGEX = '#(https\:\/\/ubistatic-a\.akamaihd\.net\/0058\/prod\/)?assets\/(data|scripts)\/__FILE__\.[a-zA-Z0-9]{16}\.js(on)?#im';
 
     /** @var CacheItemPoolInterface */
     protected $cacheApp;
@@ -39,7 +39,8 @@ class CrawlerFetchCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('crawler:fetch');
+            ->setName('crawler:collect')
+            ->setDescription('Used to collect urls for R6S data files.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -54,7 +55,7 @@ class CrawlerFetchCommand extends Command
         );
 
         if ($hasVendorFile) {
-            $vendorFile = file_get_contents($matches[0]);
+            $vendorFile = file_get_contents($this->formatUrl($matches[0]));
 
             $manifest = [];
             foreach (static::FILES as $file) {
@@ -66,7 +67,7 @@ class CrawlerFetchCommand extends Command
                 );
 
                 if ($hasMatched) {
-                    $manifest[$file] = $matches[0];
+                    $manifest[$file] = $this->formatUrl($matches[0]);
                 }
             }
 
@@ -83,5 +84,13 @@ class CrawlerFetchCommand extends Command
 
         $style->error('Error when crawling the manifest.');
         return;
+    }
+
+    private function formatUrl($url, $baseUrl = 'https://game-rainbow6.ubi.com/')
+    {
+        if (false === strpos($url, 'https')) {
+            $url = $baseUrl.$url;
+        }
+        return $url;
     }
 }
