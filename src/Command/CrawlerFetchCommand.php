@@ -84,6 +84,7 @@ class CrawlerFetchCommand extends Command
 
                     $fileCache = $this->cacheApp->getItem($this->cachePrefix.ucfirst($key));
                     $fileCache->set($file);
+                    $fileCache->expiresAfter(30*24*60*60);
                     $this->cacheApp->save($fileCache);
                     $fetched = true;
                 } catch (\Exception $e) {
